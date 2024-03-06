@@ -9,15 +9,19 @@ const dotenv = require('dotenv');
 
 // Create Express application
 const app = express();
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
 dotenv.config();
+
 // Define port for the server to listen on
 const port = process.env.PORT || 3000;
-// Start the server and listen on the specified port
+
+const server = http.createServer(app);
 server.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
+
+
+// WebSocket server setup
+const wss = new WebSocket.Server({ server });
 
 // Middleware to parse incoming request bodies
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -26,9 +30,8 @@ app.use(bodyParser.json());
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
 
-// MongoDB connection string
-const mongoURI = 'mongodb+srv://macoy:tite@cluster0.yifbkog.mongodb.net/?retryWrites=true&w=majority';
-
+// MongoDB connection string from environment variable
+const mongoURI = process.env.MONGO_URI;
 // Variable to store the latest RFID tag ID received
 let latestTagId = '';
 
