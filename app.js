@@ -114,50 +114,43 @@ app.post('/receive-event-tag', async (req, res) => {
 
 // Route to handle checking if event tag exists
 app.post('/check-event-tag', async (req, res) => {
+  let client;
   try {
-    // Extract tag ID from the request body
-    const eventTagId = req.body.tagId;
-
     // Connect to MongoDB
-    const client = new MongoClient(mongoURI);
-    await client.connect();
+    client = await connectToDatabase();
 
     // Access 'events' collection in 'test' database
     const db = client.db('test');
     const eventsCollection = db.collection('events');
 
     // Check if the event tag ID exists in the collection
-    const event = await eventsCollection.findOne({ evt_TagId: eventTagId });
+    const event = await eventsCollection.findOne({ evt_TagId: req.body.tagId });
 
-    // Close MongoDB connection
-    await client.close();
+    // Set the currentEvent variable to the received event
+    currentEvent = event;
 
-       // Set the currentEvent variable to the received event
-       currentEvent = event;
     // If the event tag is not found, store it in 'eventtag_notreg' collection
     if (!event) {
       // Check if the event tag ID already exists in the not registered event tags collection
-      const notRegisteredClient = new MongoClient(mongoURI);
-      await notRegisteredClient.connect();
-
+      const notRegisteredClient = await connectToDatabase();
       const notRegisteredDb = notRegisteredClient.db('test');
       const notRegisteredCollection = notRegisteredDb.collection('eventtags_notreg');
 
       // Check if the event tag ID already exists in the collection
-      const existingTag = await notRegisteredCollection.findOne({ eventTagId });
+      const existingTag = await notRegisteredCollection.findOne({ eventTagId: req.body.tagId });
 
       if (!existingTag) {
         // If tag is not already in the collection, insert it
-        await notRegisteredCollection.insertOne({ eventTagId, timestamp: new Date() });
+        await notRegisteredCollection.insertOne({ eventTagId: req.body.tagId, timestamp: new Date() });
 
         // Set timeout to delete the unregistered event tag after one day (24 hours)
         setTimeout(async () => {
-          await notRegisteredCollection.deleteOne({ eventTagId });
+          await notRegisteredCollection.deleteOne({ eventTagId: req.body.tagId });
         }, 24 * 60 * 60 * 1000); // One day (24 hours) timeout
       }
 
       // Close MongoDB connection
-      await notRegisteredClient.close();
+      await closeDatabaseConnection(notRegisteredClient);
     }
 
     // Send response indicating whether the event tag exists
@@ -170,6 +163,10 @@ app.post('/check-event-tag', async (req, res) => {
     // Handle errors
     console.error('Error checking event tag:', error);
     res.status(500).send('Internal Server Error');
+  } finally {
+    if (client) {
+      await closeDatabaseConnection(client);
+    }
   }
 });
 
@@ -373,6 +370,21 @@ app.post('/send-to-database', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+
+// Function to connect to MongoDB database
+async function connectToDatabase() {
+  const client = new MongoClient(mongoURI);
+  await client.connect();
+  console.log('Connected to MongoDB database');
+  return client;
+}
+
+// Function to close MongoDB database connection
+async function closeDatabaseConnection(client) {
+  await client.close();
+  console.log('Closed MongoDB database connection');
+}
 
 // Function to check if the data already exists in the collection
 async function checkExistingData(tagId, usr_FirstName, usr_LastName, usr_Course, usr_Section, usr_StudentNum, usr_Type, evt_TagId, evt_Title, evt_HostOrg) {
