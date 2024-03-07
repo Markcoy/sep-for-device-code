@@ -7,7 +7,7 @@ const WebSocket = require('ws');
 const { MongoClient } = require('mongodb');
 const dotenv = require('dotenv');
 
-/ Create Express application
+// Create Express application
 const app = express();
 dotenv.config();
 
