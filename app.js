@@ -7,7 +7,7 @@ const WebSocket = require('ws');
 const { MongoClient } = require('mongodb');
 const dotenv = require('dotenv');
 
-// Create Express application
+/ Create Express application
 const app = express();
 dotenv.config();
 
@@ -22,7 +22,6 @@ server.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
 
-
 // WebSocket server setup
 const wss = new WebSocket.Server({ server });
 
@@ -35,6 +34,13 @@ app.use(express.static('public'));
 
 // MongoDB connection string from environment variable
 const mongoURI = process.env.MONGO_URI;
+
+// Middleware to log incoming requests
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('Request Body:', req.body); // Log request body if it exists
+  next(); // Pass control to the next middleware function
+});
 // Variable to store the latest RFID tag ID received
 let latestTagId = '';
 app.get('/', async (req, res) => {
