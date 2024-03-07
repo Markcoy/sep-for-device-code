@@ -11,6 +11,9 @@ const dotenv = require('dotenv');
 const app = express();
 dotenv.config();
 
+// Set EJS as the view engine
+app.set('view engine', 'ejs');
+
 // Define port for the server to listen on
 const port = process.env.PORT || 3000;
 
@@ -37,7 +40,7 @@ let latestTagId = '';
 
 // Route to serve the homepage
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.render('index');
 });
 
 // Route to handle incoming RFID data
