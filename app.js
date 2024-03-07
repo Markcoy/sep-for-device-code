@@ -37,6 +37,29 @@ app.use(express.static('public'));
 const mongoURI = process.env.MONGO_URI;
 // Variable to store the latest RFID tag ID received
 let latestTagId = '';
+app.get('/', async (req, res) => {
+  try {
+    // Connect to MongoDB
+    const client = await connectToDatabase();
+
+    // Access 'evpattendances' collection in 'test' database
+    const db = client.db('test');
+    const collection = db.collection('evpattendances');
+
+    // Fetch all documents from the collection
+    const data = await collection.find({}).toArray();
+
+    // Close MongoDB connection
+    await closeDatabaseConnection(client);
+
+    // Render the index page with the fetched data
+    res.render('index', { data });
+  } catch (error) {
+    // Handle errors
+    console.error('Error fetching data from MongoDB:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 // Route to serve the homepage
 app.get('/', (req, res) => {

@@ -300,19 +300,37 @@ socket.addEventListener('close', (event) => {
           <th>Time In</th>
           <th>Time Out</th>
           <th>Duration</th>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>Course</th>
-          <th>Section</th>
-          <th>Student Number</th>
+          <th>User First Name</th>
+          <th>User Last Name</th>
+          <th>User Course</th>
+          <th>User Section</th>
+          <th>User Student Number</th>
           <th>User Type</th>
-          <th>Event ID</th>
+          <th>Event Tag ID</th>
           <th>Event Title</th>
-          <th>Host Org</th>
-        </tr>
-      </thead> 
-      <tbody></tbody>
-    </table>
+          <th>Event Host Org</th>
+      </tr>
+  </thead>
+  <tbody>
+      <% data.forEach(item => { %>
+          <tr>
+              <td><%= item.tagId %></td>
+              <td><%= item.timeIn %></td>
+              <td><%= item.timeOut %></td>
+              <td><%= item.duration %></td>
+              <td><%= item.usr_FirstName %></td>
+              <td><%= item.usr_LastName %></td>
+              <td><%= item.usr_Course %></td>
+              <td><%= item.usr_Section %></td>
+              <td><%= item.usr_StudentNum %></td>
+              <td><%= item.usr_Type %></td>
+              <td><%= item.evt_TagId %></td>
+              <td><%= item.evt_Title %></td>
+              <td><%= item.evt_HostOrg %></td>
+          </tr>
+      <% }); %>
+  </tbody>
+</table>
   </div>
 
   <!-- Scanned RFID Tag ID -->
