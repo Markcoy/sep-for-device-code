@@ -72,6 +72,36 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
+// Route to handle admin login
+app.post('/admin-login', async (req, res) => {
+  try {
+    // Extract username and password from the request body
+    const { username, password } = req.body;
+
+    // Check if the user with the provided credentials exists and is an admin
+    const client = await connectToDatabase();
+    const db = client.db('test');
+    const usersCollection = db.collection('users');
+    const user = await usersCollection.findOne({ usr_Username: username, usr_Password: password, usr_Type: 'Admin' });
+
+    // Close MongoDB connection
+    await closeDatabaseConnection(client);
+
+    // If user exists and is an admin, send success response
+    if (user) {
+      res.json({ success: true });
+    } else {
+      // If user does not exist or is not an admin, send failure response
+      res.json({ success: false });
+    }
+  } catch (error) {
+    // Handle errors
+    console.error('Error during admin login:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+
 // Route to handle incoming RFID data
 app.post('/rfid-data', async (req, res) => {
   try {
